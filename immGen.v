@@ -13,7 +13,7 @@ module immGen (
       3'b001:
         immediate = { {53{inst[31]}}, inst[31], inst[19:12], inst[20], inst[30:21], 1'b0 };
 
-      3'b002:
+      3'b010:
         immediate = { {52{inst[31]}}, inst[31:20] };
 
       3'b011:
@@ -28,3 +28,4 @@ module immGen (
     endcase
 
 endmodule
+
