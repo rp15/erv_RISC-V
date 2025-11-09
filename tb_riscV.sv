@@ -172,13 +172,12 @@ module tb_riscV;
   // (end: loop with BEQ x0,x0,0)
 
   localparam int START_PC = 0;
+  int pc = START_PC >> 2;
   initial begin
     // Clear memories & RF
-    for (int i = 0; i < IMEM_DEPTH; i++) imem[i] = 32'h00000013; // NOP = ADDI x0,x0,0
-    for (int i = 0; i < DMEM_DEPTH; i++) dmem[i] = '0;
-    for (int i = 0; i < 32; i++) rf[i] = '0;
-
-    int pc = START_PC >> 2;
+    //for (int i = 0; i < IMEM_DEPTH; i++) imem[i] = 32'h00000013; // NOP = ADDI x0,x0,0
+    //for (int i = 0; i < DMEM_DEPTH; i++) dmem[i] = '0;
+    //for (int i = 0; i < 32; i++) rf[i] = '0;
 
     imem[pc++] = enc_ADDI(5'd1, 5'd0, 5);     // x1 = 5
     imem[pc++] = enc_ADDI(5'd2, 5'd0, 3);     // x2 = 3
