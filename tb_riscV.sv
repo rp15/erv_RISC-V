@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-module ;
+module tb_riscV;
   // ---------------------------
   // Clock / Reset
   // ---------------------------
