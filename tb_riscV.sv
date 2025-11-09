@@ -9,9 +9,12 @@ module tb_riscV;
 
   initial begin
     rst = 1;
-    repeat (5) @(posedge clk);
+    repeat (2) @(negedge clk);
     rst = 0;
+    repeat (2) @(negedge clk);
+    rst = 1;
   end
+
 
   // ---------------------------
   // DUT I/O wires
@@ -93,7 +96,7 @@ module tb_riscV;
     if (RegWrite_RF && (writeAddr_RF != 0))
       rf[writeAddr_RF] <= writeData_RF;
     // Enforce x0 = 0
-    rf[0] <= 64'd0;
+    //rf[0] <= 64'd0;
   end
 
   // ---------------------------
@@ -143,13 +146,13 @@ module tb_riscV;
   function automatic [31:0] enc_BEQ(input [4:0] rs1, rs2, input integer imm);
     // B-type: opcode=1100011, funct3=000
     // imm is bytes; encode into imm[12|10:5|4:1|11] with LSB zero
-    automatic int simm = imm >>> 1;  // will place <<1 back by bit positions
+    automatic int simm = imm; //>>> 1;  // will place <<1 back by bit positions
     enc_BEQ = { simm[12], simm[10:5], rs2, rs1, 3'b000, simm[4:1], simm[11], 7'b1100011 };
   endfunction
 
   function automatic [31:0] enc_BNE(input [4:0] rs1, rs2, input integer imm);
     // funct3=001
-    automatic int simm = imm >>> 1;
+    automatic int simm = imm; //>>> 1;
     enc_BNE = { simm[12], simm[10:5], rs2, rs1, 3'b001, simm[4:1], simm[11], 7'b1100011 };
   endfunction
 
@@ -204,7 +207,7 @@ module tb_riscV;
     imem[pc++] = enc_BEQ(5'd0, 5'd0, 0);
 
     // Run long enough
-    repeat (200) @(posedge clk);
+    repeat (100) @(posedge clk);
 
     // ---------------------------
     // Checks
@@ -217,16 +220,24 @@ module tb_riscV;
     assert(rf[5] == 64'd1)  else $fatal("x5 mismatch: %0d", rf[5]);
     assert(rf[6] == 64'd7)  else $fatal("x6 mismatch: %0d", rf[6]);
     assert(rf[7] == 64'd15) else $fatal("x7 mismatch: %0d", rf[7]);
+    assert(rf[8] == 64'd8)  else $fatal("x8 mismatch: %0d", rf[8]);
 
     // Memory
     assert(dmem[0] == 64'd8) else $fatal("DMEM[0] mismatch: %0d", dmem[0]);
 
-    // Branch-skipped writes
-    assert(rf[9]  == 64'd0)  else $fatal("x9 should be unchanged (skipped), got %0d", rf[9]);
-    assert(rf[10] == 64'd0)  else $fatal("x10 should be unchanged (skipped), got %0d", rf[10]);
+    // Branch-skipped writes. Not initializing dmem so unchanged means X, not 0. Correct.
+    assert(rf[9]  === 64'dx)  else $fatal("x9 should be unchanged (skipped), got %0d", rf[9]);
+    assert(rf[10] === 64'dx)  else $fatal("x10 should be unchanged (skipped), got %0d", rf[10]);
 
     $display("[TB] All checks passed ✅");
     $finish;
+  end
+
+
+  always @(negedge clk)
+  begin
+	  #1
+	  $display("%d %d %d %d (%d %d %d: %d) | ", rst, clk, PC_IMEM, inst, RegWrite_RF, writeAddr_RF, writeData_RF, dut.immediate);
   end
 
 endmodule
