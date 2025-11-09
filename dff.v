@@ -8,8 +8,10 @@ module dff (
 
   always_ff @(posedge clk or negedge rst)
     if (!rst)
-      q <= 64'h0400000;
+      //q <= 64'h0400000;
+      q <= 64'h0;
     else if (en)
       q <= d;
 
 endmodule
+
