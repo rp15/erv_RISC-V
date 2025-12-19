@@ -132,13 +132,20 @@ for (my $idx = 0; $idx < scalar @inst; $idx++)
     push @temp_array, "addi 0,0,0";
     # Don't increment $idx since it's indexing the original list, not this new one.
 
-    for (; $inst[$idx] !~ /^\s+\.size/; $idx++)
+    for (; ($inst[$idx] !~ /^\s+\.size/ || $inst[$idx] =~ /jalr x0,ra,0/); $idx++)
     {
       push @temp_array, $inst[$idx];
     }
 
-    $temp_array[-1] = "EBREAK"; # Replace last jalr with terminating pseudo instruction. Used in testbench to stop running the code.
-    # Don't increment $idx since it's indexing the original list, not this new one.
+    if ($temp_array[-1] =~ /jalr x0,ra,0/)
+    {
+      $temp_array[-1] = "EBREAK"; # Replace last jalr with terminating pseudo instruction. Used in testbench to stop running the code.
+      # Don't increment $idx since it's indexing the original list, not this new one.
+    }
+    else # Loop stopped just before last jalr if .size directives are filtered/not emitted by compiler.
+    {
+      push @temp_array, "EBREAK";
+    }
 
     unshift @organized_inst_list, @temp_array;
   }
