@@ -132,7 +132,8 @@ for (my $idx = 0; $idx < scalar @inst; $idx++)
     push @temp_array, "addi 0,0,0";
     # Don't increment $idx since it's indexing the original list, not this new one.
 
-    for (; ($inst[$idx] !~ /^\s+\.size/ || $inst[$idx] =~ /jalr x0,ra,0/); $idx++)
+    # If compiler is not emitting directives, last jalr marks end of main.
+    for (; ($inst[$idx] !~ /^\s+\.size/ && $inst[$idx] !~ /jalr x0,ra,0/); $idx++)
     {
       push @temp_array, $inst[$idx];
     }
